@@ -1,6 +1,8 @@
 #pragma once
 #include "CatalogRepository.hpp"
 #include <stdexcept>
+#include "Statistics.hpp"
+
 
 namespace course {
 class PaymentGateway {
@@ -11,6 +13,14 @@ class FakePaymentGateway : public PaymentGateway {
   public: bool charge(const std::string&, const std::string&, double amount) override {
     return amount <= 9999.0;
   }
+  private:
+  CatalogRepository& repo;
+  PaymentGateway& pg;
+  CourseStatistics stats; // nuevo
+
+public:
+  CourseStatistics& statistics() { return stats; } // getter
+
 };
 class CourseService {
   public:
@@ -30,7 +40,11 @@ class CourseService {
       auto e=repo.createEnrollment(userId, courseId);
       if(c->price>0.0){ if(!pg.charge(userId,courseId,c->price)){ e.cancel(); repo.updateEnrollment(e); throw std::runtime_error("payment declined"); } }
       e.confirm(); repo.updateEnrollment(e); return e;
-    }
+      e.confirm();
+    repo.updateEnrollment(e);
+    stats.recordEnrollment(courseId);
+    return e;
+ }
     Enrollment addProgress(const std::string& enrollmentId, double delta){
       auto e=repo.findEnrollment(enrollmentId); if(!e) throw std::runtime_error("enrollment not found");
       auto up=*e; up.addProgress(delta); repo.updateEnrollment(up); return up;
