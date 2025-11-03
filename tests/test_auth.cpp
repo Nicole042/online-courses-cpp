@@ -10,5 +10,10 @@ int main(){
   e = svc.addProgress(e.enrollmentId, 0.6);
   assert(e.progress>0.59);
   return 0;
+  auto stats = svc.statistics();
+stats.recordEnrollment(c.id.value);
+stats.updateProgress(c.id.value, 0.5);
+stats.printSummary();
+
 }
 
