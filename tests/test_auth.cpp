@@ -1,19 +1,44 @@
-#include "src/course/CourseService.hpp"
+#include "src/auth/AuthService.hpp"
+#include "src/auth/User.hpp"
 #include <cassert>
-int main(){
-  using namespace course;
-  CatalogRepository repo; FakePaymentGateway pay; CourseService svc(repo, pay);
-  auto c = svc.createCourse("Algoritmos","Base",5.0);
-  c = svc.publishCourse(c.id.value);
-  auto e = svc.enroll("user-1", c.id.value);
-  assert(e.status==EnrollmentStatus::Active);
-  e = svc.addProgress(e.enrollmentId, 0.6);
-  assert(e.progress>0.59);
-  return 0;
-  auto stats = svc.statistics();
-stats.recordEnrollment(c.id.value);
-stats.updateProgress(c.id.value, 0.5);
-stats.printSummary();
+#include <iostream>
 
+using namespace auth;
+
+int main() {
+  UserRepository repo;
+  AuthService service(repo);
+
+  try {
+    // 1. registro correcto
+    auto u = service.registerUser("Ana", "ana@example.com", "pass", UserRole::Student);
+    assert(u.name == "Ana");
+
+    // 2. login correcto
+    auto token = service.login("ana@example.com", "pass");
+    assert(token.size() > 5);
+
+    // 3. error: email invalido
+    bool error = false;
+    try { service.registerUser("X", "malemail", "123", UserRole::Student); }
+    catch (...) { error = true; }
+    assert(error);
+
+    // 4. password corto
+    error = false;
+    try { service.registerUser("User", "ok@mail.com", "1", UserRole::Student); }
+    catch (...) { error = true; }
+    assert(error);
+
+    // 5. login con contraseña incorrecta
+    error = false;
+    try { service.login("ana@example.com", "wrong"); }
+    catch (...) { error = true; }
+    assert(error);
+
+    std::cout << "[Auth Tests] OK\n";
+  } catch (...) {
+    std::cerr << "Error en Auth tests\n";
+  }
 }
 
