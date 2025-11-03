@@ -1,11 +1,14 @@
-#include "src/auth/AuthService.hpp"
+#include "src/course/CourseService.hpp"
 #include <cassert>
 int main(){
-  using namespace auth;
-  UserRepository r; AuthService s(r);
-  auto u=s.registerUser("Luis","luis@example.com","pw",UserRole::Student);
-  auto tok=s.login("luis@example.com","pw");
-  assert(!tok.empty()); assert(s.validateToken(tok));
-  bool bad=false; try{s.login("luis@example.com","bad");}catch(...){bad=true;}
-  assert(bad); return 0;
+  using namespace course;
+  CatalogRepository repo; FakePaymentGateway pay; CourseService svc(repo, pay);
+  auto c = svc.createCourse("Algoritmos","Base",5.0);
+  c = svc.publishCourse(c.id.value);
+  auto e = svc.enroll("user-1", c.id.value);
+  assert(e.status==EnrollmentStatus::Active);
+  e = svc.addProgress(e.enrollmentId, 0.6);
+  assert(e.progress>0.59);
+  return 0;
 }
+

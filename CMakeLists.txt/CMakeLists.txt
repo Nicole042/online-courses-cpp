@@ -33,3 +33,4 @@ enable_testing()
 add_test(NAME test_auth COMMAND test_auth)
 add_test(NAME test_course COMMAND test_course)
 
+
