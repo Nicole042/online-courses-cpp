@@ -1,4 +1,5 @@
 #include "src/security/AccessControl.hpp"
+#include "src/course/Serialization.hpp"
 
 int main() {
   using namespace auth;
