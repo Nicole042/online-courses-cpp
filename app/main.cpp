@@ -19,6 +19,8 @@ int main() {
     std::cout << "Progreso: " << e.progress * 100 << "%\n";
   } catch (std::exception &ex) {
     std::cerr << "Error: " << ex.what() << "\n";
+    notify::FakeEmailNotifier mailer;
+    CourseService courses(catalog, pg, mailer);
   }
 }
 
