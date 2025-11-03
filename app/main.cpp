@@ -1,3 +1,5 @@
+#include "src/security/AccessControl.hpp"
+
 int main() {
   using namespace auth;
   using namespace course;
@@ -22,6 +24,9 @@ int main() {
     notify::FakeEmailNotifier mailer;
     CourseService courses(catalog, pg, mailer);
   }
+  if (!security::AccessControl::canCreateCourse(auth::UserRole::Student)) {
+  std::cout << "Un estudiante no puede crear cursos (esperado)\n";
+}
 }
 
 
